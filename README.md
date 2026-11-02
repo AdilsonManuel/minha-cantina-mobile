@@ -1,23 +1,34 @@
-# Minha Cantina - Aplicação Móvel Flutter 📱🍽️
+# Minha Cantina - Aplicação Móvel Flutter 📱🛒
 
-Aplicação móvel multiplataforma (**Android, iOS, Web, Linux, macOS, Windows**) do sistema **Minha Cantina**, desenvolvida com **Flutter (Dart 3, Material 3)** seguindo a arquitetura **MVVM + Repository**.
+Aplicação móvel multiplataforma (**Android, iOS, Web, Linux, macOS, Windows**) do sistema **Minha Cantina** (Mercadorias e Pequena Mercearia de Conveniência / *Small Grocery Store* em Angola), desenvolvida com **Flutter (Dart 3, Material 3)** seguindo a arquitetura **MVVM + Repository**.
+
+---
+
+## 🔄 Auto-Push Automático
+
+Este repositório possui auto-push configurado em `.githooks/post-commit`.
+Para comitar e enviar alterações com um só comando:
+```bash
+./autopush.sh "sua mensagem de commit"
+```
+Ou ao fazer qualquer `git commit -m "..."`, o envio para o GitHub é acionado automaticamente!
 
 ---
 
 ## ✨ Funcionalidades Principais
 
-* **Cardápio Inteligente:** Navegação por categorias (*Almoço, Bebidas, Especial, Sobremesa*), fotos de pratos, preços em Kwanzas (`Kz`), controlo de stock em tempo real e carrinho de compras.
+* **Catálogo de Mercearia com Pesquisa:** Navegação por artigos essenciais (*Mercearia, Óleos & Enlatados, Lacticínios & Matabicho, Bebidas, Higiene & Limpeza, Biscoitos*), unidades de medida (`kg`, `litro`, `lata`, `pct`, `un`), pesquisa por texto/código de barras e cesto de compras.
 * **Chave de Levantamento Presencial (OTP):**
   * Geração e exibição em destaque de código OTP de 6 dígitos (ex: `4 8 2 9 1 0`).
-  * **QR Code Dinâmico:** Gerado diretamente pelo `qr_flutter` para leitura imediata pelo leitor do atendedor na cantina.
-  * **Temporizador Regressivo em Tempo Real:** Indicador visual de prazo limite com garantia de estorno caso não seja levantado a tempo.
+  * **QR Code Dinâmico:** Gerado diretamente pelo `qr_flutter` para leitura imediata pelo leitor do balconista na cantina.
+  * **Temporizador Regressivo em Tempo Real:** Indicador visual de prazo limite com garantia de devolução dos artigos ao stock e estorno integral para a carteira.
 * **Carteira Digital & Recargas:**
   * Exibição de saldo em Kwanzas (`AOA / Kz`).
   * Modal de carregamento via **Multicaixa Express**, **Transferência Bancária / BAI Directo** (com botão para copiar o IBAN da cantina) e **Depósito**.
   * **Extrato do Livro-Razão (*Ledger*):** Auditoria de cada débito, crédito ou estorno com transparência de saldo anterior e posterior.
-* **Posto de Atendimento do Atendedor:**
+* **Balcão da Cantina (Terminal do Balconista):**
   * Terminal do operador da cantina para inserção do código OTP ou leitura do QR Code.
-  * Validação instantânea de estado da reserva e conferência dos pratos pedidos antes da entrega (`PICKED_UP`).
+  * Validação instantânea de estado da reserva e conferência das mercadorias antes da entrega final ao cliente (`PICKED_UP`).
 * **Seletor de Conexão com Backend:**
   * Permite alternar dinamicamente entre **Localhost (8080)**, **Emulador Android (10.0.2.2)** e **Produção no Render (`https://minha-cantina-api.onrender.com`)**.
   * Modo de demonstração com mock state reativo caso o backend esteja offline.
