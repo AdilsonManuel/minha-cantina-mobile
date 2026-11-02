@@ -65,6 +65,10 @@ flutter run --dart-define=API_URL=https://minha-cantina-api.onrender.com
 
 ---
 
+<!-- Live continuous auto-push active -->
+
+---
+
 ## 🧪 Testes
 Para executar a suite de testes automatizados:
 ```bash
