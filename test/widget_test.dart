@@ -1,3 +1,4 @@
+// Testes de interface e navegação da Cantina de Mercearia
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minha_cantina_app/main.dart';
 
