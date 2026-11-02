@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# =============================================================================
+# GIT POST-COMMIT HOOK - AUTO-PUSH PARA O GITHUB (MOBILE)
+# =============================================================================
+set -e
+
+# Permite contornar o hook quando o comando autopush.sh já executa o push diretamente
+if [ "$GIT_POST_COMMIT_SKIP_PUSH" = "1" ]; then
+    exit 0
+fi
+
+CURRENT_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+
+if [ -z "$CURRENT_BRANCH" ]; then
+    echo "⚠️ [Auto-Push] HEAD desanexado. O envio automático foi ignorado."
+    exit 0
+fi
+
+if ! git remote get-url origin >/dev/null 2>&1; then
+    echo "⚠️ [Auto-Push] Nenhum remote 'origin' configurado. O envio automático foi cancelado."
+    exit 0
+fi
+
+echo ""
+echo "🚀 [Auto-Push] Enviando automaticamente o commit para origin/$CURRENT_BRANCH..."
+if git push origin "$CURRENT_BRANCH"; then
+    echo "✅ [Auto-Push] Alterações enviadas com sucesso para o GitHub!"
+else
+    echo "❌ [Auto-Push] Falha ao enviar para o GitHub. Verifique a sua conexão ou permissões."
+fi
+echo ""
