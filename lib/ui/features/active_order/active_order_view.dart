@@ -101,8 +101,8 @@ class ActiveOrderView extends StatelessWidget {
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: onGoToMenu,
-                icon: const Icon(Icons.restaurant_menu),
-                label: const Text('Explorar Cardápio'),
+                icon: const Icon(Icons.storefront_outlined),
+                label: const Text('Fazer Compras na Cantina'),
               ),
             ],
           ),
@@ -224,7 +224,7 @@ class ActiveOrderView extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           const Text(
-            'Mostre o QR Code ou diga o código ao atendedor',
+            'Mostre o QR Code ou diga o código ao balconista da cantina',
             style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
           ),
         ],

@@ -39,10 +39,14 @@ class ApiService {
   // ---------------------------------------------------------------------------
   // PRODUTOS
   // ---------------------------------------------------------------------------
-  Future<List<Product>> fetchProducts() async {
+  Future<List<Product>> fetchProducts({String? search}) async {
     try {
+      final uri = (search != null && search.trim().isNotEmpty)
+          ? Uri.parse('$baseUrl/api/v1/products?search=${Uri.encodeQueryComponent(search.trim())}')
+          : Uri.parse('$baseUrl/api/v1/products');
+
       final response = await http
-          .get(Uri.parse('$baseUrl/api/v1/products'), headers: _headers)
+          .get(uri, headers: _headers)
           .timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {
@@ -51,6 +55,15 @@ class ApiService {
       }
     } catch (e) {
       debugPrint('Backend offline, usando dados locais de demonstração: $e');
+    }
+    if (search != null && search.trim().isNotEmpty) {
+      final q = search.trim().toLowerCase();
+      return _mockProducts
+          .where((p) =>
+              p.name.toLowerCase().contains(q) ||
+              p.category.toLowerCase().contains(q) ||
+              (p.barcode != null && p.barcode!.contains(q)))
+          .toList();
     }
     return _mockProducts;
   }
@@ -332,62 +345,146 @@ class ApiService {
   static final List<Product> _mockProducts = [
     const Product(
       id: 1,
-      name: 'Prato do Dia: Frango Grelhado',
-      description: 'Arroz solto, feijão de óleo de palma e salada mista.',
-      category: 'Almoço',
-      price: 2200.0,
-      stockQuantity: 28,
-      imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947',
+      name: 'Arroz Tio Lucas Agulha 1kg',
+      description: 'Arroz agulha longo de qualidade superior, grão solto e fácil cozedura.',
+      category: 'Mercearia',
+      unit: 'kg',
+      barcode: '5601234001011',
+      price: 1850.0,
+      stockQuantity: 80,
+      imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c',
       isActive: true,
     ),
     const Product(
       id: 2,
-      name: 'Bitoque de Vaca com Ovo',
-      description: 'Bife suculento grelhado com ovo a cavalo e batatas fritas.',
-      category: 'Almoço',
-      price: 2800.0,
-      stockQuantity: 18,
-      imageUrl: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092',
+      name: 'Açúcar Moreno Nacional 1kg',
+      description: 'Açúcar moreno de cana puro para adoçar o seu dia.',
+      category: 'Mercearia',
+      unit: 'kg',
+      barcode: '5601234001028',
+      price: 1600.0,
+      stockQuantity: 60,
+      imageUrl: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635',
       isActive: true,
     ),
     const Product(
       id: 3,
-      name: 'Mufete Tradicional de Peixe',
-      description: 'Peixe carapau grelhado com farinha de mandioca e batata doce.',
-      category: 'Especial',
-      price: 3500.0,
-      stockQuantity: 12,
-      imageUrl: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2',
+      name: 'Fubá de Bombó Fina 1kg',
+      description: 'Fubá de mandioca selecionada para o melhor funge tradicional.',
+      category: 'Mercearia',
+      unit: 'kg',
+      barcode: '5601234001035',
+      price: 1200.0,
+      stockQuantity: 50,
+      imageUrl: 'https://images.unsplash.com/photo-1607672632458-9eb56696346b',
       isActive: true,
     ),
     const Product(
       id: 4,
-      name: 'Sumo Natural de Maracujá 400ml',
-      description: 'Sumo natural fresco da fruta, fresco e revigorante.',
-      category: 'Bebidas',
-      price: 500.0,
-      stockQuantity: 45,
-      imageUrl: 'https://images.unsplash.com/photo-1613478223719-2ab802602423',
+      name: 'Massa Esparguete Cigala 500g',
+      description: 'Massa esparguete de sêmola de trigo duro de alta qualidade.',
+      category: 'Mercearia',
+      unit: 'pct',
+      barcode: '5601234001059',
+      price: 750.0,
+      stockQuantity: 100,
+      imageUrl: 'https://images.unsplash.com/photo-1621996346565-e3d5d6281691',
       isActive: true,
     ),
     const Product(
       id: 5,
-      name: 'Água Mineral da Chela 500ml',
-      description: 'Água pura engarrafada natural.',
-      category: 'Bebidas',
-      price: 300.0,
-      stockQuantity: 95,
-      imageUrl: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e',
+      name: 'Óleo Alimentar Sovena 1L',
+      description: 'Óleo vegetal puro para cozinhar e fritar com máxima qualidade.',
+      category: 'Óleos & Enlatados',
+      unit: 'litro',
+      barcode: '5601234001073',
+      price: 2100.0,
+      stockQuantity: 45,
+      imageUrl: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5',
       isActive: true,
     ),
     const Product(
       id: 6,
-      name: 'Pastel de Nata Artesanal',
-      description: 'Massa folhada estaladiça com creme de baunilha e canela.',
-      category: 'Sobremesa',
+      name: 'Sardinha em Óleo Marreta 125g',
+      description: 'Sardinha em conserva com azeite vegetal rica em ómega 3.',
+      category: 'Óleos & Enlatados',
+      unit: 'lata',
+      barcode: '5601234001080',
+      price: 650.0,
+      stockQuantity: 75,
+      imageUrl: 'https://images.unsplash.com/photo-1534483509719-3feaee7c30da',
+      isActive: true,
+    ),
+    const Product(
+      id: 7,
+      name: 'Leite em Pó Nido 400g',
+      description: 'Leite em pó gordo instantâneo fortificado com cálcio e vitaminas.',
+      category: 'Lacticínios & Matabicho',
+      unit: 'lata',
+      barcode: '5601234001127',
+      price: 3800.0,
+      stockQuantity: 25,
+      imageUrl: 'https://images.unsplash.com/photo-1550583724-b2692b85b150',
+      isActive: true,
+    ),
+    const Product(
+      id: 8,
+      name: 'Café Ginga de Angola 100g',
+      description: 'Café solúvel 100% robusta de Angola de aroma forte e encorpado.',
+      category: 'Lacticínios & Matabicho',
+      unit: 'frasco',
+      barcode: '5601234001134',
+      price: 1950.0,
+      stockQuantity: 30,
+      imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd',
+      isActive: true,
+    ),
+    const Product(
+      id: 9,
+      name: 'Gasosa Blue Laranja 330ml',
+      description: 'Refrigerante gaseificado angolano com sabor intenso a laranja.',
+      category: 'Bebidas & Refrescos',
+      unit: 'lata',
+      barcode: '5601234001165',
       price: 450.0,
-      stockQuantity: 24,
-      imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff',
+      stockQuantity: 120,
+      imageUrl: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97',
+      isActive: true,
+    ),
+    const Product(
+      id: 10,
+      name: 'Água Mineral da Chela 500ml',
+      description: 'Água mineral pura e cristalina engarrafada na serra da Chela.',
+      category: 'Bebidas & Refrescos',
+      unit: 'garrafa',
+      barcode: '5601234001196',
+      price: 250.0,
+      stockQuantity: 150,
+      imageUrl: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e',
+      isActive: true,
+    ),
+    const Product(
+      id: 11,
+      name: 'Sabão em Barra Macaco / Azul 400g',
+      description: 'Sabão em barra multiuso tradicional para roupa, loiça e limpeza.',
+      category: 'Higiene & Limpeza',
+      unit: 'barra',
+      barcode: '5601234001219',
+      price: 400.0,
+      stockQuantity: 110,
+      imageUrl: 'https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec',
+      isActive: true,
+    ),
+    const Product(
+      id: 12,
+      name: 'Bolacha Maria Nacional 200g',
+      description: 'Bolacha crocante deliciosa para acompanhar chá e café.',
+      category: 'Biscoitos & Snacks',
+      unit: 'pct',
+      barcode: '5601234001257',
+      price: 350.0,
+      stockQuantity: 90,
+      imageUrl: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35',
       isActive: true,
     ),
   ];

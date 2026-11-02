@@ -20,6 +20,9 @@ class MenuViewModel extends ChangeNotifier {
   String _selectedCategory = 'Todos';
   String get selectedCategory => _selectedCategory;
 
+  String _searchQuery = '';
+  String get searchQuery => _searchQuery;
+
   final Map<int, CartItem> _cart = {};
   List<CartItem> get cartItems => _cart.values.toList();
 
@@ -32,8 +35,20 @@ class MenuViewModel extends ChangeNotifier {
   }
 
   List<Product> get filteredProducts {
-    if (_selectedCategory == 'Todos') return _products;
-    return _products.where((p) => p.category == _selectedCategory).toList();
+    return _products.where((p) {
+      final matchesCategory = _selectedCategory == 'Todos' || p.category == _selectedCategory;
+      if (!matchesCategory) return false;
+      if (_searchQuery.trim().isEmpty) return true;
+      final q = _searchQuery.trim().toLowerCase();
+      return p.name.toLowerCase().contains(q) ||
+          p.category.toLowerCase().contains(q) ||
+          (p.barcode != null && p.barcode!.contains(q));
+    }).toList();
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
   }
 
   Future<void> loadProducts() async {
@@ -42,7 +57,7 @@ class MenuViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _products = await apiService.fetchProducts();
+      _products = await apiService.fetchProducts(search: _searchQuery.isEmpty ? null : _searchQuery);
     } catch (e) {
       _errorMessage = 'Falha ao carregar produtos: $e';
     } finally {

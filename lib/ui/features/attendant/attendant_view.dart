@@ -104,7 +104,7 @@ class _AttendantViewState extends State<AttendantView> {
                 ),
                 SizedBox(height: 2),
                 Text(
-                  'Posto de Atendimento e Entrega de Refeições',
+                  'Balcão da Cantina • Entrega de Compras de Mercearia',
                   style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
                 ),
               ],
@@ -245,7 +245,7 @@ class _AttendantViewState extends State<AttendantView> {
           ),
           const Divider(color: AppTheme.surfaceLight, height: 28),
           const Text(
-            'Pratos / Itens a Entregar:',
+            'Mercadorias / Produtos a Entregar:',
             style: TextStyle(
               color: AppTheme.textSecondary,
               fontSize: 13,
@@ -297,7 +297,7 @@ class _AttendantViewState extends State<AttendantView> {
                 }
               },
               icon: const Icon(Icons.check_circle_outline),
-              label: const Text('Confirmar Entrega da Refeição'),
+              label: const Text('Confirmar Entrega das Compras'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
                 padding: const EdgeInsets.symmetric(vertical: 16),

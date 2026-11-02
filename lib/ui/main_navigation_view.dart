@@ -111,14 +111,14 @@ class _MainNavigationViewState extends State<MainNavigationView> {
         indicatorColor: AppTheme.primary.withValues(alpha: 0.25),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.restaurant_menu_outlined),
-            selectedIcon: Icon(Icons.restaurant_menu, color: AppTheme.primaryLight),
-            label: 'Cardápio',
+            icon: Icon(Icons.storefront_outlined),
+            selectedIcon: Icon(Icons.storefront, color: AppTheme.primaryLight),
+            label: 'Cantina',
           ),
           NavigationDestination(
-            icon: Icon(Icons.qr_code_2_outlined),
-            selectedIcon: Icon(Icons.qr_code_2, color: AppTheme.primaryLight),
-            label: 'Pedido Ativo',
+            icon: Icon(Icons.shopping_bag_outlined),
+            selectedIcon: Icon(Icons.shopping_bag, color: AppTheme.primaryLight),
+            label: 'Reserva',
           ),
           NavigationDestination(
             icon: Icon(Icons.account_balance_wallet_outlined),
@@ -126,9 +126,9 @@ class _MainNavigationViewState extends State<MainNavigationView> {
             label: 'Carteira',
           ),
           NavigationDestination(
-            icon: Icon(Icons.storefront_outlined),
-            selectedIcon: Icon(Icons.storefront, color: AppTheme.primaryLight),
-            label: 'Atendedor',
+            icon: Icon(Icons.point_of_sale_outlined),
+            selectedIcon: Icon(Icons.point_of_sale, color: AppTheme.primaryLight),
+            label: 'Balcão',
           ),
         ],
       ),

@@ -3,6 +3,8 @@ class Product {
   final String name;
   final String description;
   final String category;
+  final String unit;
+  final String? barcode;
   final double price;
   final int stockQuantity;
   final String? imageUrl;
@@ -13,6 +15,8 @@ class Product {
     required this.name,
     required this.description,
     required this.category,
+    this.unit = 'un',
+    this.barcode,
     required this.price,
     required this.stockQuantity,
     this.imageUrl,
@@ -25,6 +29,8 @@ class Product {
       name: json['name'] as String,
       description: (json['description'] as String?) ?? '',
       category: json['category'] as String,
+      unit: (json['unit'] as String?) ?? 'un',
+      barcode: json['barcode'] as String?,
       price: (json['price'] as num).toDouble(),
       stockQuantity: json['stockQuantity'] as int,
       imageUrl: json['imageUrl'] as String?,
@@ -38,6 +44,8 @@ class Product {
       'name': name,
       'description': description,
       'category': category,
+      'unit': unit,
+      'barcode': barcode,
       'price': price,
       'stockQuantity': stockQuantity,
       'imageUrl': imageUrl,

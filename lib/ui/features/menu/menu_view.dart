@@ -4,7 +4,7 @@ import 'package:minha_cantina_app/ui/core/formatters.dart';
 import 'package:minha_cantina_app/data/models/product.dart';
 import 'package:minha_cantina_app/ui/features/menu/menu_view_model.dart';
 
-class MenuView extends StatelessWidget {
+class MenuView extends StatefulWidget {
   final MenuViewModel viewModel;
   final VoidCallback onOrderCreated;
 
@@ -15,23 +15,37 @@ class MenuView extends StatelessWidget {
   });
 
   @override
+  State<MenuView> createState() => _MenuViewState();
+}
+
+class _MenuViewState extends State<MenuView> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: viewModel,
+      listenable: widget.viewModel,
       builder: (context, _) {
         return Scaffold(
           body: RefreshIndicator(
-            onRefresh: viewModel.loadProducts,
+            onRefresh: widget.viewModel.loadProducts,
             color: AppTheme.primary,
             child: CustomScrollView(
               slivers: [
                 _buildSliverAppBar(context),
+                _buildSearchBar(),
                 _buildCategoryFilter(),
-                if (viewModel.isLoading && viewModel.products.isEmpty)
+                if (widget.viewModel.isLoading && widget.viewModel.products.isEmpty)
                   const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
                   )
-                else if (viewModel.errorMessage != null && viewModel.products.isEmpty)
+                else if (widget.viewModel.errorMessage != null && widget.viewModel.products.isEmpty)
                   SliverFillRemaining(
                     child: Center(
                       child: Column(
@@ -39,23 +53,40 @@ class MenuView extends StatelessWidget {
                         children: [
                           const Icon(Icons.error_outline, color: AppTheme.error, size: 48),
                           const SizedBox(height: 12),
-                          Text(viewModel.errorMessage!, style: const TextStyle(color: AppTheme.textSecondary)),
+                          Text(widget.viewModel.errorMessage!, style: const TextStyle(color: AppTheme.textSecondary)),
                           const SizedBox(height: 12),
                           ElevatedButton(
-                            onPressed: viewModel.loadProducts,
+                            onPressed: widget.viewModel.loadProducts,
                             child: const Text('Tentar Novamente'),
                           ),
                         ],
                       ),
                     ),
                   )
+                else if (widget.viewModel.filteredProducts.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.search_off_rounded, color: AppTheme.textMuted, size: 48),
+                          SizedBox(height: 12),
+                          Text(
+                            'Nenhum produto encontrado na cantina',
+                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 15),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 else
-                  _buildProductsGrid(context),
+                  _buildProductsList(context),
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             ),
           ),
-          bottomSheet: viewModel.cartCount > 0 ? _buildCartBar(context) : null,
+          bottomSheet: widget.viewModel.cartCount > 0 ? _buildCartBar(context) : null,
         );
       },
     );
@@ -65,7 +96,7 @@ class MenuView extends StatelessWidget {
     return SliverAppBar(
       floating: true,
       pinned: false,
-      expandedHeight: 100,
+      expandedHeight: 90,
       backgroundColor: AppTheme.background,
       flexibleSpace: FlexibleSpaceBar(
         titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -82,7 +113,7 @@ class MenuView extends StatelessWidget {
               ),
             ),
             Text(
-              'Reserve a sua refeição e levante sem filas',
+              'Mercearia de bairro • Encomende e levante no balcão',
               style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
             ),
           ],
@@ -91,27 +122,69 @@ class MenuView extends StatelessWidget {
     );
   }
 
+  Widget _buildSearchBar() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+        child: TextField(
+          controller: _searchController,
+          onChanged: (val) => widget.viewModel.setSearchQuery(val),
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          decoration: InputDecoration(
+            hintText: 'Pesquisar arroz, óleo, sabão, marca ou código...',
+            prefixIcon: const Icon(Icons.search, color: AppTheme.primaryLight, size: 20),
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear, size: 18, color: AppTheme.textMuted),
+                    onPressed: () {
+                      _searchController.clear();
+                      widget.viewModel.setSearchQuery('');
+                    },
+                  )
+                : null,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            filled: true,
+            fillColor: AppTheme.surface,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppTheme.surfaceLight),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(color: AppTheme.surfaceLight),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppTheme.primaryLight),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildCategoryFilter() {
     return SliverToBoxAdapter(
       child: SizedBox(
-        height: 52,
+        height: 50,
         child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           scrollDirection: Axis.horizontal,
-          itemCount: viewModel.categories.length,
+          itemCount: widget.viewModel.categories.length,
           separatorBuilder: (_, _) => const SizedBox(width: 8),
           itemBuilder: (context, index) {
-            final cat = viewModel.categories[index];
-            final isSelected = viewModel.selectedCategory == cat;
+            final cat = widget.viewModel.categories[index];
+            final isSelected = widget.viewModel.selectedCategory == cat;
             return ChoiceChip(
               label: Text(cat),
               selected: isSelected,
-              onSelected: (_) => viewModel.selectCategory(cat),
+              onSelected: (_) => widget.viewModel.selectCategory(cat),
               selectedColor: AppTheme.primary,
               backgroundColor: AppTheme.surface,
               labelStyle: TextStyle(
                 color: isSelected ? Colors.white : AppTheme.textSecondary,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 12,
               ),
               side: BorderSide(
                 color: isSelected ? AppTheme.primary : AppTheme.surfaceLight,
@@ -123,8 +196,8 @@ class MenuView extends StatelessWidget {
     );
   }
 
-  Widget _buildProductsGrid(BuildContext context) {
-    final products = viewModel.filteredProducts;
+  Widget _buildProductsList(BuildContext context) {
+    final products = widget.viewModel.filteredProducts;
 
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -141,14 +214,14 @@ class MenuView extends StatelessWidget {
   }
 
   Widget _buildProductCard(BuildContext context, Product product) {
-    final inCart = viewModel.cartItems.any((i) => i.product.id == product.id);
+    final inCart = widget.viewModel.cartItems.any((i) => i.product.id == product.id);
     final quantityInCart = inCart
-        ? viewModel.cartItems.firstWhere((i) => i.product.id == product.id).quantity
+        ? widget.viewModel.cartItems.firstWhere((i) => i.product.id == product.id).quantity
         : 0;
     final isOutOfStock = product.stockQuantity <= 0;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -163,29 +236,29 @@ class MenuView extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                width: 90,
-                height: 90,
+                width: 86,
+                height: 86,
                 color: AppTheme.surfaceLight,
                 child: product.imageUrl != null
                     ? Image.network(
                         product.imageUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (_, _, _) => const Icon(
-                          Icons.fastfood_rounded,
+                          Icons.local_grocery_store_outlined,
                           color: AppTheme.primaryLight,
-                          size: 36,
+                          size: 34,
                         ),
                       )
                     : const Icon(
-                        Icons.fastfood_rounded,
+                        Icons.local_grocery_store_outlined,
                         color: AppTheme.primaryLight,
-                        size: 36,
+                        size: 34,
                       ),
               ),
             ),
             const SizedBox(width: 14),
 
-            // Informações
+            // Informações do Produto de Mercearia
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,6 +266,7 @@ class MenuView extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Categoria + Unidade
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
@@ -200,7 +274,7 @@ class MenuView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          product.category,
+                          '${product.category} • ${product.unit}',
                           style: const TextStyle(
                             color: AppTheme.textMuted,
                             fontSize: 10,
@@ -208,7 +282,7 @@ class MenuView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Badge de Stock
+                      // Stock
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
@@ -218,10 +292,10 @@ class MenuView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          isOutOfStock ? 'Esgotado' : '${product.stockQuantity} unids.',
+                          isOutOfStock ? 'Esgotado' : '${product.stockQuantity} un em stock',
                           style: TextStyle(
                             color: isOutOfStock ? AppTheme.error : AppTheme.primaryLight,
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -234,7 +308,7 @@ class MenuView extends StatelessWidget {
                     style: const TextStyle(
                       color: AppTheme.textPrimary,
                       fontWeight: FontWeight.w700,
-                      fontSize: 15,
+                      fontSize: 14,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -242,13 +316,13 @@ class MenuView extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     product.description,
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
 
-                  // Preço e Botão Adicionar
+                  // Preço por unidade e Botões do Carrinho
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -256,7 +330,7 @@ class MenuView extends StatelessWidget {
                         Formatters.formatKz(product.price),
                         style: const TextStyle(
                           color: AppTheme.accent,
-                          fontSize: 16,
+                          fontSize: 15,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -267,8 +341,8 @@ class MenuView extends StatelessWidget {
                           children: [
                             IconButton(
                               visualDensity: VisualDensity.compact,
-                              icon: const Icon(Icons.remove_circle_outline, color: AppTheme.textSecondary),
-                              onPressed: () => viewModel.removeFromCart(product.id),
+                              icon: const Icon(Icons.remove_circle_outline, color: AppTheme.textSecondary, size: 22),
+                              onPressed: () => widget.viewModel.removeFromCart(product.id),
                             ),
                             Text(
                               '$quantityInCart',
@@ -280,19 +354,19 @@ class MenuView extends StatelessWidget {
                             ),
                             IconButton(
                               visualDensity: VisualDensity.compact,
-                              icon: const Icon(Icons.add_circle, color: AppTheme.primary),
-                              onPressed: () => viewModel.addToCart(product),
+                              icon: const Icon(Icons.add_circle, color: AppTheme.primary, size: 22),
+                              onPressed: () => widget.viewModel.addToCart(product),
                             ),
                           ],
                         )
                       else
                         ElevatedButton.icon(
-                          onPressed: () => viewModel.addToCart(product),
-                          icon: const Icon(Icons.add, size: 16),
-                          label: const Text('Pedir'),
+                          onPressed: () => widget.viewModel.addToCart(product),
+                          icon: const Icon(Icons.add_shopping_cart, size: 16),
+                          label: const Text('Comprar'),
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                            textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                         ),
                     ],
@@ -325,14 +399,14 @@ class MenuView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${viewModel.cartCount} item(s) selecionado(s)',
+                  '${widget.viewModel.cartCount} item(s) no cesto',
                   style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
                 ),
                 Text(
-                  Formatters.formatKz(viewModel.cartTotal),
+                  Formatters.formatKz(widget.viewModel.cartTotal),
                   style: const TextStyle(
                     color: AppTheme.textPrimary,
-                    fontSize: 20,
+                    fontSize: 19,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -341,11 +415,11 @@ class MenuView extends StatelessWidget {
             const Spacer(),
             ElevatedButton.icon(
               onPressed: () => _showCheckoutModal(context),
-              icon: const Icon(Icons.receipt_long_rounded),
-              label: const Text('Confirmar Reserva'),
+              icon: const Icon(Icons.shopping_bag_outlined),
+              label: const Text('Ver Cesto'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
             ),
           ],
@@ -386,41 +460,52 @@ class MenuView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Resumo da Reserva',
+                'Cesto de Compras da Cantina',
                 style: TextStyle(
                   color: AppTheme.textPrimary,
-                  fontSize: 20,
+                  fontSize: 19,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 8),
               const Text(
-                'O valor será debitado da sua carteira e será gerado o seu código OTP de recolha presencial.',
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                'O valor será debitado do saldo da sua carteira e será gerado o código OTP para levantamento no balcão.',
+                style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
               ),
               const Divider(color: AppTheme.surfaceLight, height: 24),
-              ...viewModel.cartItems.map((item) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 220),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: widget.viewModel.cartItems.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 6),
+                  itemBuilder: (_, idx) {
+                    final item = widget.viewModel.cartItems[idx];
+                    return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '${item.quantity}x ${item.product.name}',
-                          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+                        Expanded(
+                          child: Text(
+                            '${item.quantity}x ${item.product.name} (${item.product.unit})',
+                            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         Text(
                           Formatters.formatKz(item.subtotal),
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ],
-                    ),
-                  )),
+                    );
+                  },
+                ),
+              ),
               const Divider(color: AppTheme.surfaceLight, height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Total a Pagar:',
+                    'Total das Compras:',
                     style: TextStyle(
                       color: AppTheme.textPrimary,
                       fontSize: 16,
@@ -428,7 +513,7 @@ class MenuView extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    Formatters.formatKz(viewModel.cartTotal),
+                    Formatters.formatKz(widget.viewModel.cartTotal),
                     style: const TextStyle(
                       color: AppTheme.accent,
                       fontSize: 18,
@@ -437,36 +522,37 @@ class MenuView extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: () async {
                     Navigator.pop(ctx);
-                    final order = await viewModel.checkoutReservation();
+                    final order = await widget.viewModel.checkoutReservation();
                     if (order != null) {
-                      onOrderCreated();
+                      widget.onOrderCreated();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             backgroundColor: AppTheme.primary,
                             content: Text(
-                              'Reserva criada com sucesso! Código OTP: ${order.otpCode}',
+                              'Reserva de compras criada! Código OTP: ${order.otpCode}',
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
                         );
                       }
-                    } else if (viewModel.errorMessage != null && context.mounted) {
+                    } else if (widget.viewModel.errorMessage != null && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: AppTheme.error,
-                          content: Text(viewModel.errorMessage!),
+                          content: Text(widget.viewModel.errorMessage!),
                         ),
                       );
                     }
                   },
-                  child: const Text('Confirmar e Gerar OTP'),
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Confirmar e Gerar OTP'),
                 ),
               ),
             ],
