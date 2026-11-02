@@ -1,0 +1,61 @@
+# Minha Cantina - Aplicação Móvel Flutter 📱🍽️
+
+Aplicação móvel multiplataforma (**Android, iOS, Web, Linux, macOS, Windows**) do sistema **Minha Cantina**, desenvolvida com **Flutter (Dart 3, Material 3)** seguindo a arquitetura **MVVM + Repository**.
+
+---
+
+## ✨ Funcionalidades Principais
+
+* **Cardápio Inteligente:** Navegação por categorias (*Almoço, Bebidas, Especial, Sobremesa*), fotos de pratos, preços em Kwanzas (`Kz`), controlo de stock em tempo real e carrinho de compras.
+* **Chave de Levantamento Presencial (OTP):**
+  * Geração e exibição em destaque de código OTP de 6 dígitos (ex: `4 8 2 9 1 0`).
+  * **QR Code Dinâmico:** Gerado diretamente pelo `qr_flutter` para leitura imediata pelo leitor do atendedor na cantina.
+  * **Temporizador Regressivo em Tempo Real:** Indicador visual de prazo limite com garantia de estorno caso não seja levantado a tempo.
+* **Carteira Digital & Recargas:**
+  * Exibição de saldo em Kwanzas (`AOA / Kz`).
+  * Modal de carregamento via **Multicaixa Express**, **Transferência Bancária / BAI Directo** (com botão para copiar o IBAN da cantina) e **Depósito**.
+  * **Extrato do Livro-Razão (*Ledger*):** Auditoria de cada débito, crédito ou estorno com transparência de saldo anterior e posterior.
+* **Posto de Atendimento do Atendedor:**
+  * Terminal do operador da cantina para inserção do código OTP ou leitura do QR Code.
+  * Validação instantânea de estado da reserva e conferência dos pratos pedidos antes da entrega (`PICKED_UP`).
+* **Seletor de Conexão com Backend:**
+  * Permite alternar dinamicamente entre **Localhost (8080)**, **Emulador Android (10.0.2.2)** e **Produção no Render (`https://minha-cantina-api.onrender.com`)**.
+  * Modo de demonstração com mock state reativo caso o backend esteja offline.
+
+---
+
+## 🚀 Como Executar o Projeto
+
+### Pré-requisitos
+* Flutter SDK (3.24+ ou 3.44+)
+* Dart 3+
+* Emulador Android, dispositivo físico ou navegador Google Chrome
+
+### 1. Obter dependências
+```bash
+flutter pub get
+```
+
+### 2. Conectar ao Backend no Render (Produção)
+```bash
+flutter run --dart-define=API_URL=https://minha-cantina-api.onrender.com
+```
+
+### 3. Conectar ao Backend Local
+* **No Navegador Web / Desktop:**
+  ```bash
+  flutter run -d chrome
+  ```
+* **No Emulador Android Oficial:**
+  O emulador conecta automaticamente ao host através de `http://10.0.2.2:8080`.
+  ```bash
+  flutter run
+  ```
+
+---
+
+## 🧪 Testes
+Para executar a suite de testes automatizados:
+```bash
+flutter test
+```
