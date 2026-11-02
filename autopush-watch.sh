@@ -89,9 +89,10 @@ start_background() {
     fi
 
     echo -e "${BLUE}Iniciando autopush do Mobile em segundo plano...${NC}"
-    nohup "$0" run > "$LOG_FILE" 2>&1 &
+    nohup "$REPO_DIR/autopush-watch.sh" run </dev/null >> "$LOG_FILE" 2>&1 &
     local new_pid=$!
     echo "$new_pid" > "$PID_FILE"
+    disown "$new_pid" 2>/dev/null || true
     sleep 1
 
     if kill -0 "$new_pid" 2>/dev/null; then
